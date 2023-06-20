@@ -2,7 +2,9 @@
   <van-nav-bar title="标题" left-text="返回" right-text="按钮" left-arrow @click-left="onClickLeft" @click-right="onClickRight" />
   <div class="container">
     <div class="main">
-      <div class="scroll-view">123123</div>
+      <div class="scroll-view">
+          <router-view />
+      </div>
     </div>
   </div>
   <van-tabbar v-model="activeTabbar" placeholder>
@@ -22,24 +24,19 @@
 
   const tabbarList = [
     {
-      label: 'home',
+      label: '可阅报告',
       name: 'home',
       icon: 'home-o',
     },
     {
-      label: 'search',
+      label: '代理产品',
       name: 'search',
       icon: 'search',
     },
     {
-      label: 'friends',
+      label: '我的',
       name: 'friends',
       icon: 'friends-o',
-    },
-    {
-      label: 'setting',
-      name: 'setting',
-      icon: 'setting-o',
     },
   ];
 </script>
@@ -59,8 +56,6 @@
       overflow-y: auto;
 
       .scroll-view {
-        background-color: red;
-        height: 2000px;
         overflow-y: auto;
       }
     }
