@@ -11,7 +11,6 @@ import { ConfigSvgIconsPlugin } from './svgIcons';
 import { AutoRegistryComponents } from './component';
 import { AutoImportDeps } from './autoImport';
 import { ConfigCompressPlugin } from './compress';
-import { ConfigPagesPlugin } from './pages';
 import { ConfigRestartPlugin } from './restart';
 import { ConfigProgressPlugin } from './progress';
 import { ConfigEruda } from './eruda';
@@ -35,9 +34,6 @@ export function createVitePlugins(env: ViteEnv, isBuild: boolean) {
 
   // 自动按需引入依赖
   vitePlugins.push(AutoImportDeps());
-
-  // 自动生成路由
-  vitePlugins.push(ConfigPagesPlugin());
 
   // 监听配置文件改动重启
   vitePlugins.push(ConfigRestartPlugin());

@@ -1,7 +1,7 @@
 export const routes = [
   {
     path: '/',
-    component: () => import('/@/layout/basic/index.vue'),
+    component: () => import('/@/layout/index.vue'),
   },
   // 匹配不到重定向会主页
   {
