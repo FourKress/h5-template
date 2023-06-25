@@ -1,4 +1,4 @@
-import { loginPassword } from '/@/api';
+import { agentLoginByPwd } from '/@/api';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { defineStore } from 'pinia';
 
@@ -27,7 +27,7 @@ export const useUserStore = defineStore({
     },
     login() {
       return new Promise((resolve) => {
-        const { execute } = loginPassword();
+        const { execute } = agentLoginByPwd({});
         execute().then((res) => {
           this.setInfo(res);
           resolve(res);

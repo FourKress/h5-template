@@ -3,9 +3,11 @@
 </template>
 
 <script lang="ts" setup name="HomePage">
+  import { agentLoginByPwd } from '/@/api';
   import { computed } from 'vue';
   import { useUserStore } from '/@/store/modules/user';
 
+  console.log(agentLoginByPwd)
   const userStore = useUserStore();
   const getUserInfo = computed(() => {
     const { name = '' } = userStore.getUserInfo || {};
@@ -13,6 +15,4 @@
   });
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>
