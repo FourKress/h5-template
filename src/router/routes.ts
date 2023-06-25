@@ -17,6 +17,11 @@ export const routes = [
     name: 'Protocol',
     component: () => import('/@/views/protocol/index.vue'),
   },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('/@/views/register/index.vue'),
+  },
 
   // 匹配不到重定向会主页
   {

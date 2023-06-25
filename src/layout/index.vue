@@ -3,7 +3,7 @@
   <div class="container">
     <div class="main">
       <div class="scroll-view">
-          <router-view />
+        <router-view />
       </div>
     </div>
   </div>
@@ -56,6 +56,7 @@
       overflow-y: auto;
 
       .scroll-view {
+        height: 100%;
         overflow-y: auto;
       }
     }
