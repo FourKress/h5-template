@@ -1,10 +1,10 @@
 <template>
-  <div class="register-page">
+  <div class="agent-register-page">
     <div class="register-top">
       <img src="" alt="" />
       <div class="info">
-        <span class="title">{{ isRegister ? '借贷风险评估' : '登录查看报告' }}</span>
-        <span class="sub-tips">{{ isRegister ? '为保证报告准确，请输入真实信息' : '登录后可查看已购买报告' }}</span>
+        <span class="title">代理认证</span>
+        <span class="sub-tips">请填写认证信息成为代理</span>
       </div>
       <div class="right-btn"><van-icon size="20" name="service" color="#fff" /></div>
     </div>
@@ -12,14 +12,7 @@
     <div class="form-panel">
       <van-form @failed="onFailed">
         <van-cell-group :border="false">
-          <van-field v-model="name" name="pattern" v-if="isRegister" placeholder="请输入本人姓名" :rules="[{ validator: validatorName }]" />
-          <van-field
-            v-model="idCardNum"
-            name="idCardNum"
-            v-if="isRegister"
-            placeholder="请输入本人身份证"
-            :rules="[{ validator: validatorIdCardNum }]"
-          />
+          <van-field v-model="name" name="pattern" placeholder="请输入本人姓名" :rules="[{ validator: validatorName }]" />
           <van-field
             v-model="phoneNum"
             name="phoneNum"
@@ -40,67 +33,32 @@
             </template>
           </van-field>
         </van-cell-group>
-        <div class="protocol" v-if="isRegister">
+        <div class="protocol">
           <van-checkbox v-model="checked" />
           <span class="tips"
-            >您已阅读并同意<span class="link">《用户服务协议》</span><span class="link">《异议说明》</span
-            ><span class="link">《代收代付协议》</span
-            ><span class="link">《授权书》</span>，点击勾选即代表您同意上述法律文书的相关条款并签署上述法律文书。</span
+            >您已阅读并同意<span class="link">《代理协议》</span>，点击勾选即代表您同意上述法律文书的相关条款并签署上述法律文书。</span
           >
         </div>
 
         <div class="submit-btn">
-          <van-button block type="primary" native-type="submit">{{ isRegister ? '提交' : '登录' }}</van-button>
+          <van-button block type="primary" native-type="submit">提交认证</van-button>
         </div>
       </van-form>
-
-      <div class="footer">
-        <van-icon v-if="isRegister" name="description" size="20" color="rgba(128, 128, 128, 1)" />
-        <div class="tips" v-if="isRegister">示例报告</div>
-        <div class="right" @click="handleLogin">{{ isRegister ? '已有报告，立即登录' : '立即查询' }}</div>
-        <van-icon name="arrow" color="rgba(2, 121, 254, 1)" />
-      </div>
     </div>
-
-    <Advertising />
-
-    <van-action-sheet v-model:show="visiblePay" :title="`支付金额: ${payAmount}`">
-      <div class="pay-content">
-        <div class="row" v-for="pay in payList" :key="pay.key" :class="selectPay === pay.key && 'active'" @click="handleSelectPay(pay)">
-          <div class="icon"></div>
-          <div class="label">{{ pay.label }}</div>
-        </div>
-        <van-button type="primary" block>立即支付</van-button>
-      </div>
-    </van-action-sheet>
   </div>
 </template>
 
-<script lang="ts" setup name="RegisterPage">
+<script lang="ts" setup name="AgentRegisterPage">
   import { ref } from 'vue';
   import { showToast } from 'vant';
-  import Advertising from '/@/components/Advertising.vue';
 
   const name = ref('');
-  const idCardNum = ref('');
   const phoneNum = ref('');
   const authCodeNum = ref('');
   const namePattern = /^[\u4e00-\u9fa5]+$/;
-  const idCardPattern = /^([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
   const phoneNumPattern = /^1[34578]\d{9}$/;
   const authCodeNumPattern = /^\d{4}&/;
-  let isRegister = ref(true);
-  let visiblePay = ref(false);
-  let payAmount = ref(0.0);
-  let selectPay = ref('');
 
-  const payList = [
-    {
-      key: 'wechat',
-      label: '微信支付',
-      icon: ',',
-    },
-  ];
   const checked = ref(true);
 
   const validatorName = (val) => {
@@ -109,16 +67,6 @@
     }
     if (!namePattern.test(val)) {
       return '请输入中文姓名';
-    }
-    return '';
-  };
-
-  const validatorIdCardNum = (val) => {
-    if (!val) {
-      return '请输入本人身份证号';
-    }
-    if (!idCardPattern.test(val)) {
-      return '请输入正确的身份证号';
     }
     return '';
   };
@@ -146,20 +94,12 @@
   const onFailed = (errorInfo) => {
     console.log('failed', errorInfo);
     showToast('验证码错误');
-    // visiblePay.value = true;
   };
 
-  const handleLogin = () => {
-    isRegister.value = !isRegister.value;
-  };
-
-  const handleSelectPay = (pay) => {
-    selectPay.value = pay.key;
-  };
 </script>
 
 <style scoped lang="scss">
-  .register-page {
+  .agent-register-page {
     min-height: 100%;
 
     padding: 42px 42px 0;
@@ -273,75 +213,7 @@
       }
 
       .submit-btn {
-        margin-top: 40px;
-      }
-    }
-
-    .footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 36px 0 40px 0;
-
-      .left {
-        width: 40px;
-        height: 40px;
-        display: block;
-      }
-      .tips {
-        flex: 1;
-        font-size: 24px;
-        font-weight: 500;
-        color: rgba(128, 128, 128, 1);
-        padding-left: 10px;
-      }
-
-      .right {
-        flex: 1;
-        font-size: 24px;
-        font-weight: 400;
-        color: rgba(2, 121, 254, 1);
-        text-align: right;
-      }
-    }
-  }
-
-  .pay-content {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0 42px 65px;
-
-    .row {
-      display: flex;
-      align-items: center;
-      height: 126px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 1);
-      border: 4px solid rgba(255, 255, 255, 1);
-      font-size: 28px;
-      color: rgba(0, 0, 0, 1);
-      margin-bottom: 42px;
-      padding: 0 52px;
-      box-sizing: border-box;
-
-      &:last-child {
-        margin-bottom: 42px;
-      }
-
-      &.active {
-        border-color: rgba(2, 121, 254, 1);
-        box-shadow: 0px 4.05px 8.11px rgba(2, 121, 254, 0.3);
-      }
-
-      .icon {
-        width: 71px;
-        height: 71px;
-        background: #333;
-      }
-
-      .label {
-        flex: 1;
-        text-align: center;
+        margin: 40px 0;
       }
     }
   }

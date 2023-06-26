@@ -1,47 +1,89 @@
 <template>
-  <van-nav-bar title="标题" left-text="返回" right-text="按钮" left-arrow @click-left="onClickLeft" @click-right="onClickRight" />
-  <div class="container">
-    <div class="main">
-      <div class="scroll-view">
-        <router-view />
+  <div class="layout">
+    <van-nav-bar placeholder left-arrow @click-left="onClickLeft" @click-right="onClickRight">
+      <template #left>
+        <van-icon size="20" color="#fff" name="arrow-left" />
+      </template>
+      <template #title>
+        <span class="nav-title">{{ title }}</span>
+      </template>
+      <template #right>
+        <van-icon size="20" name="service" color="#fff" />
+      </template>
+    </van-nav-bar>
+    <div class="container">
+      <div class="main">
+        <div class="scroll-view">
+          <router-view />
+        </div>
       </div>
     </div>
+    <van-tabbar v-model="activeTabbar" placeholder v-if="hasTabbar">
+      <van-tabbar-item v-for="tabbar in tabbarList" :key="tabbar.name" :name="tabbar.name" :icon="tabbar.icon">{{
+        tabbar.label
+      }}</van-tabbar-item>
+    </van-tabbar>
   </div>
-  <van-tabbar v-model="activeTabbar" placeholder>
-    <van-tabbar-item v-for="tabbar in tabbarList" :key="tabbar.name" :name="tabbar.name" :icon="tabbar.icon">{{
-      tabbar.label
-    }}</van-tabbar-item>
-  </van-tabbar>
 </template>
 
 <script lang="ts" setup name="BasicLayoutPage">
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
+  import { useRoute } from 'vue-router';
   import { showToast } from 'vant';
   const onClickLeft = () => history.back();
   const onClickRight = () => showToast('按钮');
 
-  const activeTabbar = ref('home');
+  let hasTabbar = ref(true);
+  let title = ref('');
+
+  const route = useRoute();
+  watch(
+    () => route?.meta,
+    (val = {}) => {
+        hasTabbar.value = val?.hasTabbar;
+        title.value = val?.title;
+    },
+    { immediate: true },
+  );
+
+  const activeTabbar = ref('product');
 
   const tabbarList = [
-    {
-      label: '可阅报告',
-      name: 'home',
-      icon: 'home-o',
+       {
+      label: '产品',
+      name: 'product',
+      icon: 'apps-o',
     },
     {
-      label: '代理产品',
-      name: 'search',
-      icon: 'search',
+      label: '报告',
+      name: 'report',
+      icon: 'description',
+    },
+    {
+      label: '收益',
+      name: 'income',
+      icon: 'balance-o',
     },
     {
       label: '我的',
-      name: 'friends',
-      icon: 'friends-o',
+      name: 'my',
+      icon: 'contact',
     },
   ];
 </script>
 
 <style scoped lang="scss">
+  .layout {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .nav-title {
+      font-size: 32px;
+      color: rgba(255, 255, 255, 1);
+    }
+  }
   .container {
     width: 100%;
     flex: 1;

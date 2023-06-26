@@ -5,7 +5,7 @@ import store from '/@/store';
 
 import 'vant/lib/index.css';
 
-import './assets/app.css';
+import './assets/app.scss';
 
 const app = createApp(App);
 
