@@ -18,8 +18,8 @@
         </div>
       </div>
     </div>
-    <van-tabbar v-model="activeTabbar" placeholder v-if="hasTabbar">
-      <van-tabbar-item v-for="tabbar in tabbarList" :key="tabbar.name" :name="tabbar.name" :icon="tabbar.icon">{{
+    <van-tabbar route placeholder v-if="hasTabbar">
+      <van-tabbar-item v-for="tabbar in tabbarList" :key="tabbar.path" replace :to="`${tabbar.path}`" :icon="tabbar.icon">{{
         tabbar.label
       }}</van-tabbar-item>
     </van-tabbar>
@@ -40,33 +40,31 @@
   watch(
     () => route?.meta,
     (val = {}) => {
-        hasTabbar.value = val?.hasTabbar;
-        title.value = val?.title;
+      hasTabbar.value = val?.hasTabbar;
+      title.value = val?.title;
     },
     { immediate: true },
   );
 
-  const activeTabbar = ref('product');
-
   const tabbarList = [
-       {
+    {
       label: '产品',
-      name: 'product',
+      path: '/agentProduct',
       icon: 'apps-o',
     },
     {
       label: '报告',
-      name: 'report',
+      path: '/agentReport',
       icon: 'description',
     },
     {
       label: '收益',
-      name: 'income',
+      path: '/agentIncome',
       icon: 'balance-o',
     },
     {
       label: '我的',
-      name: 'my',
+      path: '/user',
       icon: 'contact',
     },
   ];

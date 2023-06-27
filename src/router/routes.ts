@@ -34,6 +34,38 @@ export const routes = [
           title: '代理产品',
         },
       },
+      {
+        path: '/agentReport',
+        name: 'AgentReport',
+        component: () => import('/@/views/agent-report/index.vue'),
+        meta: {
+          title: '可阅报告',
+        },
+      },
+      {
+        path: '/agentIncome',
+        name: 'AgentIncome',
+        component: () => import('/@/views/agent-income/index.vue'),
+        meta: {
+          title: '我的收益',
+        },
+      },
+      {
+        path: '/agentIncomeDetails',
+        name: 'AgentIncomeDetails',
+        component: () => import('/@/views/agent-income/details.vue'),
+        meta: {
+          title: '收益明细',
+        },
+      },
+         {
+        path: '/user',
+        name: 'User',
+        component: () => import('/@/views/user/index.vue'),
+        meta: {
+          title: '收益明细',
+        },
+      },
 
       {
         path: '/protocol',
