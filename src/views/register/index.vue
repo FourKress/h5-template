@@ -10,33 +10,33 @@
     </div>
 
     <div class="form-panel">
-      <van-form @failed="onFailed">
+      <van-form @failed="onFailed" @submit="onSubmit">
         <van-cell-group :border="false">
-          <van-field v-model="name" name="pattern" v-if="isRegister" placeholder="请输入本人姓名" :rules="[{ validator: validatorName }]" />
           <van-field
-            v-model="idCardNum"
-            name="idCardNum"
+            v-model="userName"
+            name="userName"
             v-if="isRegister"
-            placeholder="请输入本人身份证"
-            :rules="[{ validator: validatorIdCardNum }]"
+            placeholder="请输入本人姓名"
+            :rules="[{ validator: validatorUserName }]"
           />
+          <van-field v-model="idNo" name="idNo" v-if="isRegister" placeholder="请输入本人身份证" :rules="[{ validator: validatorIdNo }]" />
+          <van-field v-model="mobile" name="mobile" type="digit" placeholder="请输入本人手机号" :rules="[{ validator: validatorMobile }]" />
           <van-field
-            v-model="phoneNum"
-            name="phoneNum"
-            type="digit"
-            placeholder="请输入本人手机号"
-            :rules="[{ validator: validatorPhoneNum }]"
-          />
-          <van-field
-            v-model="authCodeNum"
-            name="authCodeNum"
+            v-model="smsCode"
+            name="smsCode"
             maxlength="4"
             type="digit"
             placeholder="请输入验证码"
-            :rules="[{ validator: validatorAuthCodeNum }]"
+            :rules="[{ validator: validatorSmsCode }]"
           >
             <template #button>
-              <van-button size="small" type="primary">发送验证码</van-button>
+              <van-button
+                size="small"
+                type="primary"
+                :disabled="countdown > 0 || !mobile || !mobilePattern.test(mobile)"
+                @click="sendSmsCode"
+                >{{ countdown ? `倒计时${countdown}` : '发送验证码' }}</van-button
+              >
             </template>
           </van-field>
         </van-cell-group>
@@ -80,19 +80,23 @@
   import { ref } from 'vue';
   import { showToast } from 'vant';
   import Advertising from '/@/components/Advertising.vue';
+  import { custReport, getSmsCode } from '/@/api';
 
-  const name = ref('');
-  const idCardNum = ref('');
-  const phoneNum = ref('');
-  const authCodeNum = ref('');
-  const namePattern = /^[\u4e00-\u9fa5]+$/;
+  const userName = ref('');
+  const idNo = ref('');
+  const mobile = ref('');
+  const smsCode = ref('');
+  const userNamePattern = /^[\u4e00-\u9fa5]+$/;
   const idCardPattern = /^([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
-  const phoneNumPattern = /^1[34578]\d{9}$/;
-  const authCodeNumPattern = /^\d{4}&/;
+  const mobilePattern = /^1[34578]\d{9}$/;
+  const smsCodePattern = /^\d{4}$/;
   let isRegister = ref(true);
   let visiblePay = ref(false);
   let payAmount = ref(0.0);
   let selectPay = ref('');
+  let smsKey = ref(sessionStorage.getItem('smsKey'));
+  let countdown = ref(0);
+  let timer = ref(0);
 
   const payList = [
     {
@@ -101,19 +105,19 @@
       icon: ',',
     },
   ];
-  const checked = ref(true);
+  const checked = ref(false);
 
-  const validatorName = (val) => {
+  const validatorUserName = (val) => {
     if (!val) {
       return '请输入本人姓名';
     }
-    if (!namePattern.test(val)) {
+    if (!userNamePattern.test(val)) {
       return '请输入中文姓名';
     }
     return '';
   };
 
-  const validatorIdCardNum = (val) => {
+  const validatorIdNo = (val) => {
     if (!val) {
       return '请输入本人身份证号';
     }
@@ -123,21 +127,21 @@
     return '';
   };
 
-  const validatorPhoneNum = (val) => {
+  const validatorMobile = (val) => {
     if (!val) {
       return '请输入本人手机号';
     }
-    if (!phoneNumPattern.test(val)) {
+    if (!mobilePattern.test(val)) {
       return '请输入正确的手机号';
     }
     return '';
   };
 
-  const validatorAuthCodeNum = (val) => {
+  const validatorSmsCode = (val) => {
     if (!val) {
       return '请输入验证码';
     }
-    if (!authCodeNumPattern.test(val)) {
+    if (!smsCodePattern.test(val)) {
       return '请输入正确的验证码';
     }
     return '';
@@ -145,16 +149,62 @@
 
   const onFailed = (errorInfo) => {
     console.log('failed', errorInfo);
-    showToast('验证码错误');
-    // visiblePay.value = true;
+  };
+
+  const onSubmit = (values) => {
+    console.log(values);
+    if (!checked.value) {
+        showToast('请先阅读并同意勾选协议');
+        return;
+    }
+    const { idNo, mobile, userName, smsCode } = values;
+    custReport({
+      agentNo: '',
+      productCode: '',
+      custName: userName,
+      idNo,
+      mobile,
+      smsKey: smsKey.value,
+      smsCode,
+      payChannel: '',
+      orderAmt: '',
+      terminal: '',
+    });
   };
 
   const handleLogin = () => {
     isRegister.value = !isRegister.value;
+    idNo.value = '';
+    userName.value = '';
+    mobile.value = '';
+    smsCode.value = '';
   };
 
   const handleSelectPay = (pay) => {
     selectPay.value = pay.key;
+  };
+
+  const sendSmsCode = () => {
+    countdown.value = 60;
+    timer.value = setInterval(() => {
+      countdown.value = countdown.value - 1;
+      if (countdown.value <= 0) {
+        countdown.value = 0;
+        clearInterval(timer.value);
+      }
+    }, 1000);
+    getSmsCode({
+      mobile: mobile.value,
+    })
+      .then((res) => {
+        console.log(res);
+        smsKey.value = res?.smsKey;
+        sessionStorage.setItem('smsKey', smsKey.value);
+      })
+      .catch(() => {
+        countdown.value = 0;
+        clearInterval(timer.value);
+      });
   };
 </script>
 

@@ -2,7 +2,7 @@ import { API_BASE_URL, API_TARGET_URL } from '../constant';
 import { ProxyOptions } from 'vite';
 type ProxyTargetList = Record<string, ProxyOptions>;
 
-const init: ProxyTargetList = {
+const proxyConfig: ProxyTargetList = {
   // test
   [API_BASE_URL]: {
     target: API_TARGET_URL,
@@ -11,4 +11,4 @@ const init: ProxyTargetList = {
   },
 };
 
-export default init;
+export default proxyConfig;

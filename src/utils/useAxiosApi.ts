@@ -6,6 +6,7 @@ import 'vant/es/toast/style';
 const instance = axios.create({
   withCredentials: false,
   timeout: 5000,
+  baseURL: '/QCApi',
 });
 
 // request interceptor
@@ -13,7 +14,7 @@ instance.interceptors.request.use(
   (config) => {
     // do something before request is sent
     // const token = store.state.user.token;
-
+    console.log(config);
     // if (token) {
     //   // let each request carry token
     //   config.headers = {
@@ -43,9 +44,12 @@ instance.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   (response) => {
-    const res = response.data;
-    // if the custom code is not 200, it is judged as an error.
-    if (res.code !== 200) {
+    const {
+      data: res,
+      config: { url = '' },
+    } = response;
+    const code = url.includes('common') ? 0 : '0000';
+    if (res.code !== code) {
       showToast(res.msg);
       // 412: Token expired;
       if (res.code === 412) {
@@ -53,7 +57,7 @@ instance.interceptors.response.use(
       }
       return Promise.reject(res.msg || 'Error');
     } else {
-      return res;
+      return Promise.resolve(res);
     }
   },
   (error) => {
@@ -68,5 +72,5 @@ instance.interceptors.response.use(
  */
 
 export default function useAxiosApi(url: string, config: any) {
-  return useAxios(url, config);
+  return useAxios(url, config, instance);
 }

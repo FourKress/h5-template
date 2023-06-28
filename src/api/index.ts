@@ -197,3 +197,24 @@ export function custReportView(data) {
     data,
   });
 }
+
+/**
+ * 获取验证码
+ * @returns UseAxiosReturn
+ */
+export function getSmsCode(data) {
+  return useAxiosApi(`/common/getSmsCode`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 客服信息
+ * @returns UseAxiosReturn
+ */
+export function customerService() {
+  return useAxiosApi(`/common/customerService`, {
+    method: 'GET',
+  });
+}
