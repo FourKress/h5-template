@@ -158,10 +158,9 @@ export function custLoginBySms(data) {
  * 查询用户申请记录列表
  * @returns UseAxiosReturn
  */
-export function custApplyList(params) {
+export function custApplyList() {
   return useAxiosApi(`/rpt/cust/api/v1/apply-List`, {
     method: 'GET',
-    params,
   });
 }
 

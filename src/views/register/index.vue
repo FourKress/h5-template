@@ -24,7 +24,7 @@
           <van-field
             v-model="smsCode"
             name="smsCode"
-            maxlength="4"
+            maxlength="6"
             type="digit"
             placeholder="请输入验证码"
             :rules="[{ validator: validatorSmsCode }]"
@@ -50,14 +50,14 @@
         </div>
 
         <div class="submit-btn">
-          <van-button block type="primary" native-type="submit">{{ isRegister ? '提交' : '登录' }}</van-button>
+          <van-button block type="primary" native-type="submit">{{ isRegister ? `${amt}元查询` : '登录' }}</van-button>
         </div>
       </van-form>
 
       <div class="footer">
         <van-icon v-if="isRegister" name="description" size="20" color="rgba(128, 128, 128, 1)" />
         <div class="tips" v-if="isRegister">示例报告</div>
-        <div class="right" @click="handleLogin">{{ isRegister ? '已有报告，立即登录' : '立即查询' }}</div>
+        <div class="right" @click="jumpLogin">{{ isRegister ? '已有报告，立即登录' : '暂无报告，立即查询' }}</div>
         <van-icon name="arrow" color="rgba(2, 121, 254, 1)" />
       </div>
     </div>
@@ -80,8 +80,12 @@
   import { ref } from 'vue';
   import { showToast } from 'vant';
   import Advertising from '/@/components/Advertising.vue';
-  import { custReport, getSmsCode } from '/@/api';
+  import { agentProductAmt, custLoginBySms, custReport, getSmsCode } from '/@/api';
+  import { getUrlParams2, judgeClient } from '/@/utils';
+  import { useUserStore } from '/@/store/modules/user';
 
+  const userStore = useUserStore();
+  const { agentNo = '', productCode = '' } = getUrlParams2(window.location.href);
   const userName = ref('');
   const idNo = ref('');
   const mobile = ref('');
@@ -89,7 +93,7 @@
   const userNamePattern = /^[\u4e00-\u9fa5]+$/;
   const idCardPattern = /^([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
   const mobilePattern = /^1[34578]\d{9}$/;
-  const smsCodePattern = /^\d{4}$/;
+  const smsCodePattern = /^\d{6}$/;
   let isRegister = ref(true);
   let visiblePay = ref(false);
   let payAmount = ref(0.0);
@@ -97,6 +101,16 @@
   let smsKey = ref(sessionStorage.getItem('smsKey'));
   let countdown = ref(0);
   let timer = ref(0);
+  let amt = ref(0);
+
+  agentProductAmt({
+    agentNo,
+    productCode,
+  }).then((res) => {
+    console.log(res);
+    const data = res?.data?.value;
+    amt.value = data;
+  });
 
   const payList = [
     {
@@ -153,26 +167,46 @@
 
   const onSubmit = (values) => {
     console.log(values);
-    if (!checked.value) {
-        showToast('请先阅读并同意勾选协议');
-        return;
+    if (!checked.value && isRegister.value) {
+      showToast('请先阅读并同意勾选协议');
+      return;
     }
     const { idNo, mobile, userName, smsCode } = values;
-    custReport({
-      agentNo: '',
-      productCode: '',
-      custName: userName,
-      idNo,
-      mobile,
-      smsKey: smsKey.value,
-      smsCode,
-      payChannel: '',
-      orderAmt: '',
-      terminal: '',
-    });
+
+    if (isRegister.value) {
+      custReport({
+        agentNo,
+        productCode,
+        custName: userName,
+        idNo,
+        mobile,
+        smsKey: smsKey.value,
+        smsCode,
+        payChannel: 'WECHAT_PAY',
+        // orderAmt: '',
+        terminal: judgeClient(),
+      }).then((res) => {
+        handleLogin(res);
+      });
+    } else {
+      custLoginBySms({
+        smsKey: smsKey.value,
+        smsCode,
+        mobile,
+        userName,
+      }).then((res) => {
+        handleLogin(res);
+      });
+    }
   };
 
-  const handleLogin = () => {
+  const handleLogin = (res) => {
+    const data = res?.data?.value;
+    const { token } = data;
+    token && userStore.setToken(token);
+  };
+
+  const jumpLogin = () => {
     isRegister.value = !isRegister.value;
     idNo.value = '';
     userName.value = '';
@@ -197,8 +231,8 @@
       mobile: mobile.value,
     })
       .then((res) => {
-        console.log(res);
-        smsKey.value = res?.smsKey;
+        const data = res?.data?.value;
+        smsKey.value = data?.smsKey;
         sessionStorage.setItem('smsKey', smsKey.value);
       })
       .catch(() => {

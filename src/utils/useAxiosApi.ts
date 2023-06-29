@@ -2,6 +2,7 @@ import { useAxios } from '@vueuse/integrations/useAxios';
 import axios from 'axios';
 import { showToast } from 'vant';
 import 'vant/es/toast/style';
+import { useCookies } from '@vueuse/integrations/useCookies';
 
 const instance = axios.create({
   withCredentials: false,
@@ -9,19 +10,18 @@ const instance = axios.create({
   baseURL: '/QCApi',
 });
 
+const { VITE_TOKEN_KEY } = import.meta.env;
+
 // request interceptor
 instance.interceptors.request.use(
-  (config) => {
-    // do something before request is sent
-    // const token = store.state.user.token;
-    console.log(config);
-    // if (token) {
-    //   // let each request carry token
-    //   config.headers = {
-    //     ...config.headers,
-    //     Authorization: `Bearer ${token}`
-    //   };
-    // }
+  (config: any) => {
+    const token = useCookies().get(VITE_TOKEN_KEY as string);
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        'X-TOKEN': `${token}`,
+      };
+    }
     return config;
   },
   (error) => {
@@ -55,7 +55,7 @@ instance.interceptors.response.use(
       if (res.code === 412) {
         // store.dispatch('user/userLogout');
       }
-      return Promise.reject(res.msg || 'Error');
+      return Promise.reject(res || 'Error');
     } else {
       return Promise.resolve(res);
     }
