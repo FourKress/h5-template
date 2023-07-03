@@ -10,23 +10,17 @@
     </div>
 
     <div class="form-panel">
-      <van-form @failed="onFailed">
+      <van-form @submit="onSubmit">
         <van-cell-group :border="false">
-          <van-field v-model="name" name="pattern" placeholder="请输入本人姓名" :rules="[{ validator: validatorName }]" />
+          <van-field v-model="userName" name="userName" placeholder="请输入本人姓名" :rules="[{ validator: validatorUserName }]" />
+          <van-field v-model="mobile" name="mobile" type="digit" placeholder="请输入本人手机号" :rules="[{ validator: validatorMobile }]" />
           <van-field
-            v-model="phoneNum"
-            name="phoneNum"
-            type="digit"
-            placeholder="请输入本人手机号"
-            :rules="[{ validator: validatorPhoneNum }]"
-          />
-          <van-field
-            v-model="authCodeNum"
-            name="authCodeNum"
-            maxlength="4"
+            v-model="smsCode"
+            name="smsCode"
+            maxlength="6"
             type="digit"
             placeholder="请输入验证码"
-            :rules="[{ validator: validatorAuthCodeNum }]"
+            :rules="[{ validator: validatorSmsCode }]"
           >
             <template #button>
               <van-button size="small" type="primary">发送验证码</van-button>
@@ -52,48 +46,49 @@
   import { ref } from 'vue';
   import { showToast } from 'vant';
 
-  const name = ref('');
-  const phoneNum = ref('');
-  const authCodeNum = ref('');
-  const namePattern = /^[\u4e00-\u9fa5]+$/;
-  const phoneNumPattern = /^1[34578]\d{9}$/;
-  const authCodeNumPattern = /^\d{4}&/;
+  const userName = ref('');
+  const mobile = ref('');
+  const smsCode = ref('');
+  const userNamePattern = /^[\u4e00-\u9fa5]+$/;
+  const mobilePattern = /^1[34578]\d{9}$/;
+  const smsCodePattern = /^\d{6}$/;
+  const checked = ref(false);
 
-  const checked = ref(true);
-
-  const validatorName = (val) => {
+  const validatorUserName = (val) => {
     if (!val) {
       return '请输入本人姓名';
     }
-    if (!namePattern.test(val)) {
+    if (!userNamePattern.test(val)) {
       return '请输入中文姓名';
     }
     return '';
   };
 
-  const validatorPhoneNum = (val) => {
+  const validatorMobile = (val) => {
     if (!val) {
       return '请输入本人手机号';
     }
-    if (!phoneNumPattern.test(val)) {
+    if (!mobilePattern.test(val)) {
       return '请输入正确的手机号';
     }
     return '';
   };
 
-  const validatorAuthCodeNum = (val) => {
+  const validatorSmsCode = (val) => {
     if (!val) {
       return '请输入验证码';
     }
-    if (!authCodeNumPattern.test(val)) {
+    if (!smsCodePattern.test(val)) {
       return '请输入正确的验证码';
     }
     return '';
   };
 
-  const onFailed = (errorInfo) => {
-    console.log('failed', errorInfo);
-    showToast('验证码错误');
+  const onSubmit = (values) => {
+    if (!checked.value && isRegister.value) {
+      showToast('请先阅读并同意勾选协议');
+      return;
+    }
   };
 
 </script>

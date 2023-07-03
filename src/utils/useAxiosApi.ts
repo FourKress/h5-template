@@ -49,6 +49,17 @@ instance.interceptors.response.use(
       config: { url = '' },
     } = response;
     const code = url.includes('common') ? 0 : '0000';
+    // 下载类型的请求, 返回值为ArrayBuffer类型,做特殊处理, 请求时需要设置 responseType: 'arraybuffer',
+    const isArrayBuffer = res instanceof ArrayBuffer;
+    if (isArrayBuffer) {
+      // 返回文件流
+      return Promise.resolve(
+        new Blob([res], {
+          type: 'application/pdf',
+        }),
+      );
+    }
+
     if (res.code !== code) {
       showToast(res.msg);
       // 412: Token expired;

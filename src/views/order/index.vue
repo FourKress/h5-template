@@ -2,46 +2,51 @@
   <div class="order">
     <div class="item" v-for="item in orderList" :key="item">
       <div class="top">
-        <span class="label">专业版</span>
-        <span class="status">{{ applyStatusMap[item.applyStatus] }}生成中</span>
+        <span class="label">{{ item.productName }}</span>
+        <span class="status">{{ applyStatusMap[item.applyStatus] }}</span>
       </div>
       <div class="info">
         <div class="row">
           <span class="label">姓名:</span>
-          <span class="text">{{ item.custId }}</span>
-        </div>
-        <div class="row">
-          <span class="label">身份证号:</span>
           <span class="text">{{ item.custName }}</span>
         </div>
         <div class="row">
+          <span class="label">身份证号:</span>
+          <span class="text">{{ item.custId }}</span>
+        </div>
+        <div class="row">
           <span class="label">手机号:</span>
-          <span class="text">撒大声地</span>
+          <span class="text">{{ item.mobile }}</span>
         </div>
       </div>
       <div class="tips">
         <span class="label">实付</span>
-        <span class="amount">¥89.90</span>
+        <span class="amount">¥{{ item.payAmt }}</span>
       </div>
       <div class="footer">
         <div class="btn" v-if="item.applyStatus === 'SUCCESS' && item.share" @click="handleSendAgent(item)">发送代理商</div>
         <div class="btn" v-if="item.applyStatus === 'SUCCESS'" @click="handleDownload(item)">下载</div>
 
-        <div class="btn" v-if="item.applyStatus === 'FAILURE'" @click="handleSendAgent(item)">联系客服</div>
+        <div class="btn" v-if="item.applyStatus === 'FAILURE'" @click="handleContactCustomerService">联系客服</div>
         <div class="btn" v-if="item.applyStatus === 'FAILURE'" @click="handleRetry(item)">重试</div>
 
-        <div class="btn" v-if="item.applyStatus === 'REFUND'" @click="handleDownload(item)">去查询</div>
-        <div class="btn" v-if="item.applyStatus === 'APPLY'" @click="handleDownload(item)">查看示例</div>
+        <div class="btn" v-if="item.applyStatus === 'REFUND'" @click="handleSearch(item)">去查询</div>
+        <div class="btn" v-if="item.applyStatus === 'APPLY'" @click="handleCheckExample(item)">查看示例</div>
       </div>
     </div>
+
+    <van-dialog v-model:show="show" title="联系客服">
+      <img class="img" src="https://fastly.jsdelivr.net/npm/@vant/assets/apple-3.jpeg" />
+    </van-dialog>
   </div>
 </template>
 
 <script lang="ts" setup name="OrderPage">
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { showConfirmDialog, showLoadingToast, showToast } from 'vant';
   import { custApplyList, custReportDownload, custReportRetry, custReportShare } from '/@/api';
 
+  let show = ref(false);
   const applyStatusMap = {
     APPLY: '生成中',
     SUCCESS: '',
@@ -50,9 +55,15 @@
   };
   let orderList = ref([]);
 
-  custApplyList().then((res) => {
-    console.log(res.data.value);
-    orderList.value = res.data.value;
+  const getList = () => {
+    custApplyList().then((res) => {
+      console.log(res.data.value);
+      orderList.value = res.data.value;
+    });
+  };
+
+  onMounted(() => {
+    getList();
   });
 
   const handleSendAgent = (order) => {
@@ -72,14 +83,27 @@
   };
 
   const handleDownload = (order) => {
-    showLoadingToast({
+    const loading = showLoadingToast({
       message: '开始下载...',
       forbidClick: true,
+      duration: 0,
     });
     const { paySerialNo } = order;
     custReportDownload({
       paySerialNo,
-    });
+    })
+      .then((res) => {
+        const blob = res.response.value;
+        const objectUrl = URL.createObjectURL(blob); // 创建URL
+        const link = document.createElement('a');
+        link.download = 'download';
+        link.href = objectUrl;
+        link.click(); // 下载文件
+        URL.revokeObjectURL(objectUrl); // 释放内存
+      })
+      .finally(() => {
+        loading.close();
+      });
   };
 
   const handleRetry = (order) => {
@@ -88,8 +112,21 @@
       paySerialNo,
     }).then(() => {
       showToast('重试成功');
+      getList();
     });
   };
+
+  const handleContactCustomerService = () => {
+      show.value = true;
+  };
+
+  const handleCheckExample = (order) => {
+      console.log(order)
+  }
+
+  const handleSearch = (order) => {
+      console.log(order)
+  }
 </script>
 
 <style scoped lang="scss">
@@ -183,5 +220,12 @@
         }
       }
     }
+  }
+
+  .img {
+    display: flex;
+    width: 300px;
+    height: 300px;
+    margin: 50px auto 0;
   }
 </style>

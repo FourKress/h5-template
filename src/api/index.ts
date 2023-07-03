@@ -118,6 +118,7 @@ export function custReportDownload(data) {
   return useAxiosApi(`/rpt/cust/api/v1/report-download`, {
     method: 'POST',
     data,
+    responseType: 'arraybuffer',
   });
 }
 

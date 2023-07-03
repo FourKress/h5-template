@@ -10,7 +10,7 @@
     </div>
 
     <div class="form-panel">
-      <van-form @failed="onFailed" @submit="onSubmit">
+      <van-form @submit="onSubmit">
         <van-cell-group :border="false">
           <van-field
             v-model="userName"
@@ -102,14 +102,13 @@
   let countdown = ref(0);
   let timer = ref(0);
   let amt = ref(0);
+  const checked = ref(false);
 
   agentProductAmt({
     agentNo,
     productCode,
   }).then((res) => {
-    console.log(res);
-    const data = res?.data?.value;
-    amt.value = data;
+    amt.value = res?.data?.value;
   });
 
   const payList = [
@@ -119,7 +118,6 @@
       icon: ',',
     },
   ];
-  const checked = ref(false);
 
   const validatorUserName = (val) => {
     if (!val) {
@@ -161,12 +159,7 @@
     return '';
   };
 
-  const onFailed = (errorInfo) => {
-    console.log('failed', errorInfo);
-  };
-
   const onSubmit = (values) => {
-    console.log(values);
     if (!checked.value && isRegister.value) {
       showToast('请先阅读并同意勾选协议');
       return;
