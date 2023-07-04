@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <van-nav-bar placeholder left-arrow @click-left="onClickLeft" @click-right="onClickRight">
+    <van-nav-bar placeholder left-arrow @click-left="onClickLeft">
       <template #left>
         <van-icon size="20" color="#fff" name="arrow-left" />
       </template>
@@ -8,7 +8,9 @@
         <span class="nav-title">{{ title }}</span>
       </template>
       <template #right>
-        <van-icon size="20" name="service" color="#fff" />
+        <CustomerService>
+          <van-icon size="20" name="service" color="#fff" />
+        </CustomerService>
       </template>
     </van-nav-bar>
     <div class="container">
@@ -29,9 +31,7 @@
 <script lang="ts" setup name="BasicLayoutPage">
   import { ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
-  import { showToast } from 'vant';
   const onClickLeft = () => history.back();
-  const onClickRight = () => showToast('按钮');
 
   let hasTabbar = ref(true);
   let title = ref('');
@@ -100,5 +100,12 @@
         overflow-y: auto;
       }
     }
+  }
+
+  .img {
+    display: flex;
+    width: 300px;
+    height: 300px;
+    margin: 50px auto 0;
   }
 </style>

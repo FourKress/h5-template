@@ -19,6 +19,7 @@
     "mitt": "^3.0.0",
     "pinia": "^2.1.0",
     "pinia-plugin-persistedstate": "^3.1.0",
+    "qrcode": "^1.5.3",
     "sass": "^1.63.4",
     "universal-cookie": "^4.0.4",
     "vant": "^4.4.0",

@@ -111,6 +111,17 @@ export function agentLoginBySms(data) {
 }
 
 /**
+ * 获取链接
+ * @returns UseAxiosReturn
+ */
+export function agentPromoLink(params) {
+  return useAxiosApi(`/rpt/agent/api/v1/promoLink`, {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
  * 下载报告
  * @returns UseAxiosReturn
  */

@@ -1,48 +1,128 @@
 <template>
   <div class="agent-product">
-    <div class="item" v-for="item in 10" :key="item">
+    <div class="item" v-for="item in productList" :key="item">
       <span class="tag">已开通</span>
       <div class="top">
         <span class="tips">查看示例<van-icon name="arrow" color="rgba(166, 166, 166, 1)" /></span>
       </div>
       <div class="info">
         <div class="left">
-          <span class="label">普通版</span>
+          <span class="label">{{ item.productDesc }}</span>
           <span class="text">
-            <span>48.00元</span>
-            <span class="btn">修改</span>
+            <span>{{ item.agentAmt }}元</span>
+            <span class="btn" @click="handleShowModifyAmtDialog(item)">修改</span>
           </span>
         </div>
         <div class="right">
           <span class="label">基础定价</span>
-          <span class="text">18.00元</span>
+          <span class="text">{{ item.baseAmt }}元</span>
         </div>
       </div>
       <div class="footer">
-        <div class="btn" @click="handleSendAgent">二维码</div>
-        <div class="btn" @click="handleDownload">复制链接</div>
+        <div class="btn" @click="handleQrCode(item)">二维码</div>
+        <div class="btn" @click="handleCopy(item)">复制链接</div>
       </div>
+    </div>
+
+    <van-dialog v-model:show="show" title="请输入销售价格" show-cancel-button @confirm="handleModifyAmt" :before-close="handleBeforeClose">
+      <van-field v-model="productAmt" type="number" placeholder="请输入销售价格" />
+    </van-dialog>
+
+    <div v-show="showQrcode">
+      <van-dialog title="产品二维码" :show="true" @confirm="handleCloseQrCode">
+        <canvas class="qrcode"></canvas>
+      </van-dialog>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup name="AgentProductPage">
-  import { showConfirmDialog, showToast } from 'vant';
-  const handleSendAgent = () => {
-    showConfirmDialog({
-      title: '确认发送',
-      message: '确认发送该报告给代理商？代理商仅能在24小时内查看。',
-    })
-      .then(() => {
-        // on confirm
-      })
-      .catch(() => {
-        // on cancel
-      });
+  import { onMounted, ref } from 'vue';
+  import { showToast } from 'vant';
+  import QRCode from 'qrcode';
+  import { agentProductList, agentUpdateProduct, agentPromoLink } from '/@/api';
+  import { getUrlParams2 } from '/@/utils';
+
+  const { agentNo = '' } = getUrlParams2(window.location.href);
+
+  let show = ref(false);
+  let showQrcode = ref(false);
+  let productList = ref([]);
+  let productAmt = ref(0);
+  let modifyProduct = ref({});
+
+  onMounted(() => {
+    if (!agentNo) return;
+    getProductList();
+  });
+
+  const getProductList = () => {
+    agentProductList({
+      agentNo,
+    }).then((res) => {
+      productList.value = res.data.value;
+    });
   };
 
-  const handleDownload = () => {
-    showToast('开始下载');
+  const handleShowModifyAmtDialog = (product) => {
+    const { baseAmt, agentAmt, maxAmt, productCode } = product;
+    productAmt.value = agentAmt;
+    modifyProduct.value = {
+      minAmt: baseAmt,
+      maxAmt,
+      productCode,
+    };
+    show.value = true;
+  };
+
+  const handleModifyAmt = () => {
+    if (!productAmt.value) return;
+    agentUpdateProduct({
+      agentNo,
+      productCode: modifyProduct.value.productCode,
+      agentAmt: productAmt.value,
+    }).then(() => {
+      showToast('改价成功');
+      getProductList();
+    });
+  };
+
+  const handleBeforeClose = (action) => {
+    if (action === 'confirm' && !productAmt.value) return false;
+    return true;
+  };
+
+  const handleQrCode = (product) => {
+    agentPromoLink({
+      productCode: product.productCode,
+    }).then((res) => {
+      showQrcode.value = true;
+      QRCode.toCanvas(document.querySelector('.qrcode'), res.data.value, function (error) {
+        if (error) console.error(error);
+        console.log('success!');
+      });
+    });
+  };
+
+  const handleCloseQrCode = () => {
+    showQrcode.value = false;
+  };
+
+  const handleCopy = (product) => {
+    agentPromoLink({
+      productCode: product.productCode,
+    }).then((res) => {
+      const input = document.createElement('input');
+      input.setAttribute('readonly', 'readonly');
+      input.setAttribute('value', res.data.value);
+      document.body.appendChild(input);
+      input.setSelectionRange(0, 9999);
+      if (document.execCommand('copy')) {
+        document.execCommand('copy');
+        showToast('已复制');
+      }
+      document.body.removeChild(input);
+    });
   };
 </script>
 
@@ -165,5 +245,21 @@
         }
       }
     }
+  }
+
+  :deep .van-field__control {
+    text-align: center;
+    font-size: 48px;
+    color: rgba(255, 141, 26, 1);
+    width: 80%;
+    margin: 0 auto;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(229, 229, 229, 1);
+    border-radius: 0px;
+  }
+
+  .qrcode {
+    display: block;
+    margin: 0 auto;
   }
 </style>

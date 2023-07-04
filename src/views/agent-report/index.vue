@@ -1,7 +1,7 @@
 <template>
   <div class="agent-report-page">
     <div class="top-tips">请勿随意传播 避免客户信息泄露</div>
-    <div class="item" v-for="item in 10" :key="item">
+    <div class="item" v-for="item in reportList" :key="item">
       <div class="top">
         <span class="label">专业版</span>
         <span class="status">到期时间</span>
@@ -10,15 +10,15 @@
       <div class="info">
         <div class="row">
           <span class="label">姓名:</span>
-          <span class="text">撒大声地</span>
+          <span class="text">{{item.custName}}</span>
         </div>
         <div class="row">
           <span class="label">身份证号:</span>
-          <span class="text">撒大声地</span>
+          <span class="text">{{item.custId}}</span>
         </div>
         <div class="row">
           <span class="label">手机号:</span>
-          <span class="text">撒大声地</span>
+          <span class="text">{{item.mobile}}</span>
         </div>
       </div>
       <div class="footer">
@@ -29,6 +29,23 @@
 </template>
 
 <script lang="ts" setup name="AgentReportPage">
+  import { agentReportList } from '/@/api';
+  import { onMounted, ref } from 'vue';
+
+  let reportList = ref([]);
+
+  onMounted(() => {
+    getReportList();
+  });
+
+  const getReportList = () => {
+    agentReportList({
+      agentNo: '',
+      custName: '',
+    }).then((res) => {
+      reportList.value = res.data.value;
+    });
+  };
   const handleCheckDetails = (item) => {
     console.log(item);
   };
@@ -43,8 +60,8 @@
 
     .top-tips {
       padding: 28px 0;
-       font-size: 26px;
-          color: rgba(2, 121, 254, 1);
+      font-size: 26px;
+      color: rgba(2, 121, 254, 1);
     }
 
     .item {
@@ -79,7 +96,7 @@
         width: 100%;
         text-align: right;
         font-size: 28px;
-          color: rgba(255, 141, 26, 1);
+        color: rgba(255, 141, 26, 1);
       }
 
       .info {

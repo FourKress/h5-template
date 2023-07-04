@@ -12,7 +12,7 @@
         </div>
         <div class="row">
           <span class="label">身份证号:</span>
-          <span class="text">{{ item.custId }}</span>
+          <span class="text">{{ item.idNo }}</span>
         </div>
         <div class="row">
           <span class="label">手机号:</span>
@@ -24,29 +24,27 @@
         <span class="amount">¥{{ item.payAmt }}</span>
       </div>
       <div class="footer">
-        <div class="btn" v-if="item.applyStatus === 'SUCCESS' && item.share" @click="handleSendAgent(item)">发送代理商</div>
+        <div class="btn" v-if="item.applyStatus === 'SUCCESS' && item.share === 'Y'" @click="handleSendAgent(item)">发送代理商</div>
         <div class="btn" v-if="item.applyStatus === 'SUCCESS'" @click="handleDownload(item)">下载</div>
 
-        <div class="btn" v-if="item.applyStatus === 'FAILURE'" @click="handleContactCustomerService">联系客服</div>
+        <div class="btn" v-if="item.applyStatus === 'FAILURE'"> <CustomerService>联系客服</CustomerService></div>
         <div class="btn" v-if="item.applyStatus === 'FAILURE'" @click="handleRetry(item)">重试</div>
 
-        <div class="btn" v-if="item.applyStatus === 'REFUND'" @click="handleSearch(item)">去查询</div>
-        <div class="btn" v-if="item.applyStatus === 'APPLY'" @click="handleCheckExample(item)">查看示例</div>
+        <div class="btn" v-if="item.applyStatus === 'REFUND'" @click="handleSearch">去查询</div>
+        <div class="btn" v-if="item.applyStatus === 'APPLY'" @click="handleCheckExample">查看示例</div>
       </div>
     </div>
-
-    <van-dialog v-model:show="show" title="联系客服">
-      <img class="img" src="https://fastly.jsdelivr.net/npm/@vant/assets/apple-3.jpeg" />
-    </van-dialog>
   </div>
 </template>
 
 <script lang="ts" setup name="OrderPage">
   import { ref, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
   import { showConfirmDialog, showLoadingToast, showToast } from 'vant';
+  import CustomerService from '/@/components/CustomerService.vue';
   import { custApplyList, custReportDownload, custReportRetry, custReportShare } from '/@/api';
 
-  let show = ref(false);
+  const router = useRouter();
   const applyStatusMap = {
     APPLY: '生成中',
     SUCCESS: '',
@@ -116,17 +114,13 @@
     });
   };
 
-  const handleContactCustomerService = () => {
-      show.value = true;
+  const handleCheckExample = () => {
+    window.open('http://rpt.quchaq.com/profile/qucha/open/demo.pdf');
   };
 
-  const handleCheckExample = (order) => {
-      console.log(order)
-  }
-
-  const handleSearch = (order) => {
-      console.log(order)
-  }
+  const handleSearch = () => {
+    router.push(`/register?agentNo=${sessionStorage.getItem('agentNo')}&productCode=${sessionStorage.getItem('productCode')}`);
+  };
 </script>
 
 <style scoped lang="scss">

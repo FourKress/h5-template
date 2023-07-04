@@ -6,7 +6,7 @@
         <span class="title">代理认证</span>
         <span class="sub-tips">请填写认证信息成为代理</span>
       </div>
-      <div class="right-btn"><van-icon size="20" name="service" color="#fff" /></div>
+      <CustomerService><van-icon size="20" name="service" color="#fff" /></CustomerService>
     </div>
 
     <div class="form-panel">
@@ -23,7 +23,13 @@
             :rules="[{ validator: validatorSmsCode }]"
           >
             <template #button>
-              <van-button size="small" type="primary">发送验证码</van-button>
+              <van-button
+                size="small"
+                type="primary"
+                :disabled="countdown > 0 || !mobile || !mobilePattern.test(mobile)"
+                @click="sendSmsCode"
+                >{{ countdown ? `倒计时${countdown}S` : '发送验证码' }}</van-button
+              >
             </template>
           </van-field>
         </van-cell-group>
@@ -44,8 +50,15 @@
 
 <script lang="ts" setup name="AgentRegisterPage">
   import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
   import { showToast } from 'vant';
+  import { getSmsCode, agentLoginBySms } from '/@/api';
+  import { useUserStore } from '/@/store/modules/user';
+  import CustomerService from '/@/components/CustomerService.vue';
 
+  const userStore = useUserStore();
+
+  const router = useRouter();
   const userName = ref('');
   const mobile = ref('');
   const smsCode = ref('');
@@ -53,6 +66,9 @@
   const mobilePattern = /^1[34578]\d{9}$/;
   const smsCodePattern = /^\d{6}$/;
   const checked = ref(false);
+  let countdown = ref(0);
+  let timer = ref(0);
+  let smsKey = ref(sessionStorage.getItem('smsKey'));
 
   const validatorUserName = (val) => {
     if (!val) {
@@ -85,12 +101,47 @@
   };
 
   const onSubmit = (values) => {
-    if (!checked.value && isRegister.value) {
+    if (!checked.value) {
       showToast('请先阅读并同意勾选协议');
       return;
     }
+    const { mobile, userName, smsCode } = values;
+    agentLoginBySms({
+      mobile,
+      userName,
+      smsCode,
+      smsKey: smsKey.value,
+    }).then((res) => {
+        const data = res?.data?.value;
+        const { token } = data;
+        token && userStore.setToken(token);
+        const agentNoStr = 'AT642d84dde5d4491ea53e8a5619f311e6';
+        router.push(`/agentProduct?agentNo=${agentNoStr}`)
+    });
   };
 
+  const sendSmsCode = () => {
+    countdown.value = 60;
+    timer.value = setInterval(() => {
+      countdown.value = countdown.value - 1;
+      if (countdown.value <= 0) {
+        countdown.value = 0;
+        clearInterval(timer.value);
+      }
+    }, 1000);
+    getSmsCode({
+      mobile: mobile.value,
+    })
+      .then((res) => {
+        const data = res?.data?.value;
+        smsKey.value = data?.smsKey;
+        sessionStorage.setItem('smsKey', smsKey.value);
+      })
+      .catch(() => {
+        countdown.value = 0;
+        clearInterval(timer.value);
+      });
+  };
 </script>
 
 <style scoped lang="scss">
@@ -211,5 +262,12 @@
         margin: 40px 0;
       }
     }
+  }
+
+  .img {
+    display: flex;
+    width: 300px;
+    height: 300px;
+    margin: 50px auto 0;
   }
 </style>

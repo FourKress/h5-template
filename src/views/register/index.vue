@@ -5,8 +5,10 @@
       <div class="info">
         <span class="title">{{ isRegister ? '借贷风险评估' : '登录查看报告' }}</span>
         <span class="sub-tips">{{ isRegister ? '为保证报告准确，请输入真实信息' : '登录后可查看已购买报告' }}</span>
+        <CustomerService>
+          <van-icon size="20" name="service" color="#fff" />
+        </CustomerService>
       </div>
-      <div class="right-btn"><van-icon size="20" name="service" color="#fff" /></div>
     </div>
 
     <div class="form-panel">
@@ -35,7 +37,7 @@
                 type="primary"
                 :disabled="countdown > 0 || !mobile || !mobilePattern.test(mobile)"
                 @click="sendSmsCode"
-                >{{ countdown ? `倒计时${countdown}` : '发送验证码' }}</van-button
+                >{{ countdown ? `倒计时${countdown}S` : '发送验证码' }}</van-button
               >
             </template>
           </van-field>
@@ -78,12 +80,15 @@
 
 <script lang="ts" setup name="RegisterPage">
   import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
   import { showToast } from 'vant';
   import Advertising from '/@/components/Advertising.vue';
+  import CustomerService from '/@/components/CustomerService.vue';
   import { agentProductAmt, custLoginBySms, custReport, getSmsCode } from '/@/api';
   import { getUrlParams2, judgeClient } from '/@/utils';
   import { useUserStore } from '/@/store/modules/user';
 
+  const router = useRouter();
   const userStore = useUserStore();
   const { agentNo = '', productCode = '' } = getUrlParams2(window.location.href);
   const userName = ref('');
@@ -103,6 +108,9 @@
   let timer = ref(0);
   let amt = ref(0);
   const checked = ref(false);
+
+  sessionStorage.setItem('agentNo', agentNo);
+  sessionStorage.setItem('productCode', productCode);
 
   agentProductAmt({
     agentNo,
@@ -197,6 +205,7 @@
     const data = res?.data?.value;
     const { token } = data;
     token && userStore.setToken(token);
+    router.push(`/order?agentNo=${agentNo}`);
   };
 
   const jumpLogin = () => {
