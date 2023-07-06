@@ -2,26 +2,28 @@
   <div class="agent-income-page">
     <div class="top">
       <div class="center">
-        <span class="value">+120.00</span>
+        <span class="value">+{{ incomeInfo.todayIncome || '0.00' }}</span>
         <span class="label">今日收益（元）</span>
       </div>
       <div class="list">
         <div class="item">
-          <span class="value">120.00</span>
+          <span class="value">{{ incomeInfo.currentMonthIncome || '0.00' }}</span>
           <span class="label">本月收益</span>
         </div>
         <div class="item">
-          <span class="value">120.00</span>
+          <span class="value">{{ incomeInfo.lastMonthIncome || '0.00' }}</span>
           <span class="label">上月收益</span>
         </div>
         <div class="item">
-          <span class="value">120.00</span>
+          <span class="value">{{ incomeInfo.totalIncome || '0.00' }}</span>
           <span class="label">累计收益</span>
         </div>
       </div>
     </div>
 
-    <div class="more-btn">查看明细 <van-icon name="arrow" color="rgba(2, 121, 254, 1)" /></div>
+    <div class="more-btn">
+      <span @click="jumpDetails">查看明细 <van-icon name="arrow" color="rgba(2, 121, 254, 1)" /></span>
+    </div>
 
     <div class="details">
       <div class="top">
@@ -29,20 +31,45 @@
         <span>销售额</span>
         <span>收益</span>
       </div>
-      <div class="item" v-for="item in 7" :key="item">
-        <span>2023-03-01</span>
-        <span>1000.00</span>
-        <span>+140.00</span>
+      <div class="item" v-for="item in incomeInfo.dailyReportList" :key="item">
+        <span>{{ item.createTime }}</span>
+        <span>{{ item.salesAmount }}</span>
+        <span>+{{ item.income }}</span>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup name="AgentIncomePage"></script>
+<script lang="ts" setup name="AgentIncomePage">
+  import { onMounted, ref } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { agentIncome } from '/@/api';
+
+  const router = useRouter();
+  const incomeInfo = ref({});
+
+  onMounted(() => {
+    getIncome();
+  });
+
+  const getIncome = () => {
+    agentIncome({
+      agentNo: sessionStorage.getItem('agentNo'),
+    }).then((res) => {
+      console.log(res.data.value);
+      incomeInfo.value = res.data.value;
+    });
+  };
+
+  const jumpDetails = () => {
+    router.push('/agentIncomeDetails');
+  };
+</script>
 
 <style scoped lang="scss">
   .agent-income-page {
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
     padding-bottom: 60px;
     background-color: rgba(245, 245, 245, 1);

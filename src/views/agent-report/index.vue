@@ -10,15 +10,15 @@
       <div class="info">
         <div class="row">
           <span class="label">姓名:</span>
-          <span class="text">{{item.custName}}</span>
+          <span class="text">{{ item.custName }}</span>
         </div>
         <div class="row">
           <span class="label">身份证号:</span>
-          <span class="text">{{item.custId}}</span>
+          <span class="text">{{ item.custId }}</span>
         </div>
         <div class="row">
           <span class="label">手机号:</span>
-          <span class="text">{{item.mobile}}</span>
+          <span class="text">{{ item.mobile }}</span>
         </div>
       </div>
       <div class="footer">
@@ -39,10 +39,7 @@
   });
 
   const getReportList = () => {
-    agentReportList({
-      agentNo: '',
-      custName: '',
-    }).then((res) => {
+    agentReportList().then((res) => {
       reportList.value = res.data.value;
     });
   };
@@ -54,6 +51,7 @@
 <style scoped lang="scss">
   .agent-report-page {
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
     padding: 0 43px 60px;
     background-color: rgba(245, 245, 245, 1);

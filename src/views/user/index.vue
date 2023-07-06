@@ -1,13 +1,15 @@
 <template>
   <div class="user-page">
     <div class="user-info">
-      <div class="avatar"></div>
+      <div class="avatar">
+        <van-icon name="manager" size="48" color="#D1D1D1" />
+      </div>
       <div class="info">
-        <span class="name">啊实打实大</span>
-        <span class="phone">1738402222</span>
+        <span class="name">{{  status ? useInfo.agentName : '游客' }}</span>
+        <span class="phone" v-if="status">{{ useInfo.mobile }}</span>
       </div>
 
-      <div class="tag">未认证</div>
+      <div class="tag" v-if="!status">未认证</div>
     </div>
 
     <div class="card">
@@ -38,18 +40,43 @@
       </div>
     </div>
     <div class="card">
-      <div class="row">
-        <van-icon name="service" size="20" color="rgba(2, 121, 254, 1)" />
-        <span class="label">联系客服</span>
-      </div>
+      <CustomerService>
+        <div class="row">
+          <van-icon name="service" size="20" color="rgba(2, 121, 254, 1)" />
+          <span class="label">联系客服</span>
+        </div>
+      </CustomerService>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup name="UserPage">
+  import { onMounted, ref } from 'vue';
   import { useRouter } from 'vue-router';
+  import { agentMy } from '/@/api';
+  import { useUserStore } from '/@/store/modules/user';
+  import CustomerService from '/@/components/CustomerService.vue';
 
   const router = useRouter();
+  const userStore = useUserStore();
+  const appUser = userStore.info;
+  const { mobile, status } = appUser;
+
+  const useInfo = ref({});
+
+  onMounted(() => {
+    getMyInfo();
+  });
+
+  const getMyInfo = () => {
+    agentMy({
+      mobile,
+      openId: '',
+    }).then((res) => {
+      useInfo.value = res.data.value;
+    });
+  };
+
   const handleJump = (path) => {
     router.push(path);
   };
@@ -66,13 +93,13 @@
     .user-info {
       display: flex;
       align-items: center;
+      margin-bottom: 40px;
 
       .avatar {
         width: 100px;
         height: 100px;
         border-radius: 4px;
         overflow: hidden;
-        background-color: #333;
       }
 
       .info {
@@ -98,12 +125,16 @@
     }
 
     .card {
-      margin-top: 65px;
+      margin-bottom: 65px;
       background-color: #fff;
       min-height: 110px;
       border-radius: 20px;
       display: flex;
       flex-direction: column;
+
+      &:last-child {
+        margin-top: 0;
+      }
 
       .row {
         height: 110px;

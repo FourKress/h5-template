@@ -58,7 +58,7 @@
 
       <div class="footer">
         <van-icon v-if="isRegister" name="description" size="20" color="rgba(128, 128, 128, 1)" />
-        <div class="tips" v-if="isRegister">示例报告</div>
+        <div class="tips" v-if="isRegister" @click="handleCheckExample">示例报告</div>
         <div class="right" @click="jumpLogin">{{ isRegister ? '已有报告，立即登录' : '暂无报告，立即查询' }}</div>
         <van-icon name="arrow" color="rgba(2, 121, 254, 1)" />
       </div>
@@ -66,13 +66,13 @@
 
     <Advertising />
 
-    <van-action-sheet v-model:show="visiblePay" :title="`支付金额: ${payAmount}`">
+    <van-action-sheet v-model:show="visiblePay" :title="`支付金额: ${amt}`">
       <div class="pay-content">
         <div class="row" v-for="pay in payList" :key="pay.key" :class="selectPay === pay.key && 'active'" @click="handleSelectPay(pay)">
           <div class="icon"></div>
           <div class="label">{{ pay.label }}</div>
         </div>
-        <van-button type="primary" block>立即支付</van-button>
+        <van-button type="primary" block :disabled="!selectPay" @click="handlePay">立即支付</van-button>
       </div>
     </van-action-sheet>
   </div>
@@ -101,7 +101,6 @@
   const smsCodePattern = /^\d{6}$/;
   let isRegister = ref(true);
   let visiblePay = ref(false);
-  let payAmount = ref(0.0);
   let selectPay = ref('');
   let smsKey = ref(sessionStorage.getItem('smsKey'));
   let countdown = ref(0);
@@ -188,6 +187,7 @@
         terminal: judgeClient(),
       }).then((res) => {
         handleLogin(res);
+        visiblePay.value = true;
       });
     } else {
       custLoginBySms({
@@ -197,6 +197,7 @@
         userName,
       }).then((res) => {
         handleLogin(res);
+        router.push(`/order?agentNo=${agentNo}`);
       });
     }
   };
@@ -205,7 +206,9 @@
     const data = res?.data?.value;
     const { token } = data;
     token && userStore.setToken(token);
-    router.push(`/order?agentNo=${agentNo}`);
+    userStore.setInfo({
+      mobile: mobile.value,
+    });
   };
 
   const jumpLogin = () => {
@@ -241,6 +244,14 @@
         countdown.value = 0;
         clearInterval(timer.value);
       });
+  };
+
+  const handleCheckExample = () => {
+    window.open('http://rpt.quchaq.com/profile/qucha/open/demo.pdf');
+  };
+
+  const handlePay = () => {
+    router.push(`/order?agentNo=${agentNo}`);
   };
 </script>
 

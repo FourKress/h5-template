@@ -10,7 +10,7 @@ interface StoreUser {
 }
 
 export const useUserStore = defineStore({
-  id: 'app-user',
+  id: 'appUser',
   state: (): StoreUser => ({
     token: token,
     info: {},
@@ -22,6 +22,7 @@ export const useUserStore = defineStore({
   },
   actions: {
     setInfo(info: any) {
+      console.log(info)
       this.info = info ? info : '';
     },
     setToken(token: string) {
@@ -29,8 +30,7 @@ export const useUserStore = defineStore({
     }
   },
   persist: {
-    key: 'token',
-    storage: localStorage,
-    paths: ['token'],
+    storage: sessionStorage,
+    paths: ['info'],
   },
 });

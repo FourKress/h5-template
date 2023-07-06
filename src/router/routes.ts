@@ -58,12 +58,20 @@ export const routes = [
           title: '收益明细',
         },
       },
-         {
+      {
         path: '/user',
         name: 'User',
         component: () => import('/@/views/user/index.vue'),
         meta: {
-          title: '收益明细',
+          title: '我的',
+        },
+      },
+      {
+        path: '/agentOrder',
+        name: 'AgentOrder',
+        component: () => import('/@/views/agent-order/index.vue'),
+        meta: {
+          title: '我的订单',
         },
       },
 

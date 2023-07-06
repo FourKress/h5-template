@@ -52,11 +52,14 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { showToast } from 'vant';
-  import { getSmsCode, agentLoginBySms } from '/@/api';
+  import { getSmsCode, agentLoginBySms, agentStatus } from '/@/api';
   import { useUserStore } from '/@/store/modules/user';
+  import { getUrlParams2 } from '/@/utils';
   import CustomerService from '/@/components/CustomerService.vue';
 
   const userStore = useUserStore();
+  const { agentNo = '' } = getUrlParams2(window.location.href);
+  sessionStorage.setItem('agentNo', agentNo);
 
   const router = useRouter();
   const userName = ref('');
@@ -111,12 +114,18 @@
       userName,
       smsCode,
       smsKey: smsKey.value,
-    }).then((res) => {
-        const data = res?.data?.value;
-        const { token } = data;
-        token && userStore.setToken(token);
-        const agentNoStr = 'AT642d84dde5d4491ea53e8a5619f311e6';
-        router.push(`/agentProduct?agentNo=${agentNoStr}`)
+    }).then(async (res) => {
+      const data = res?.data?.value;
+      const { token } = data;
+      token && userStore.setToken(token);
+
+      const statusRes = await agentStatus();
+      userStore.setInfo({
+        mobile,
+        status: statusRes.data.value === 'BIND_MOBILE',
+      });
+      const agentNoStr = sessionStorage.getItem('agentNo');
+      await router.push(`/agentProduct?agentNo=${agentNoStr}`);
     });
   };
 

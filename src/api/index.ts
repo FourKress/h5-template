@@ -26,10 +26,9 @@ export function agentMy(params) {
  * 可查看报告列表
  * @returns UseAxiosReturn
  */
-export function agentReportList(data) {
+export function agentReportList() {
   return useAxiosApi(`/rpt/agent/api/v1/reportList`, {
     method: 'POST',
-    data,
   });
 }
 
@@ -229,3 +228,14 @@ export function customerService() {
     method: 'GET',
   });
 }
+
+/**
+ * 代理状态
+ * @returns UseAxiosReturn
+ */
+export function agentStatus() {
+  return useAxiosApi(`/rpt/agent/api/v1/agentStatus`, {
+    method: 'GET',
+  });
+}
+

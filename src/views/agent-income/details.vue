@@ -1,29 +1,73 @@
 <template>
   <div class="agent-income-details-page">
-    <div class="page-top">
-      2023.03
+    <div class="page-top" @click="showPicker = true">
+      {{ cycle.text }}
       <van-icon name="arrow-down" color="rgba(0, 0, 0, 1)" />
     </div>
     <div class="tips">
-      <span>收入 ¥ 360.00<span class="count">共10笔</span></span>
-      <span>支出 ¥ 360.00<span class="count">共10笔</span></span>
+      <span
+        >收入 ¥ {{ totalInfo.totalIncome }}<span class="count">共{{ totalInfo.totalNum }}笔</span></span
+      >
+      <span
+        >支出 ¥ {{ totalInfo.backAmt }}<span class="count">共{{ totalInfo.backNum }}笔</span></span
+      >
     </div>
     <div class="list">
-      <div class="item" v-for="item in 10" :key="item">
+      <div class="item" v-for="item in totalInfo.items" :key="item">
         <div class="top">
           <span class="label">订单收入</span>
-          <span class="value">+20.00</span>
+          <span class="value">+{{ item.income }}</span>
         </div>
         <div class="footer">
-          <span class="timer">2023-3-02 12:23:12</span>
-          <span class="btn">详情</span>
+          <span class="timer">{{ item.bizDate }}</span>
+          <span class="btn" @click="checkDetails">详情</span>
         </div>
       </div>
     </div>
+
+    <van-popup v-model:show="showPicker" round position="bottom">
+      <van-picker :columns="columns" @cancel="showPicker = false" @confirm="onConfirm" />
+    </van-popup>
   </div>
 </template>
 
-<script lang="ts" setup name="AgentIncomeDetailsPage"></script>
+<script lang="ts" setup name="AgentIncomeDetailsPage">
+  import { ref, onMounted } from 'vue';
+  import { agentIncomeDetail } from '/@/api';
+
+  const detailsInfo = ref({});
+  const showPicker = ref(false);
+  const columns = [
+    { text: '上周', value: 'LAST_WEEK' },
+    { text: '上月', value: 'LAST_MONTH' },
+    { text: '近三月', value: 'THREE_MONTH' },
+    { text: '近半年', value: 'HALF_YEAR' },
+  ];
+  const cycle = ref({ text: '上周', value: 'LAST_WEEK' });
+  const totalInfo = ref({});
+
+  onMounted(() => {
+    getDetailsList();
+  });
+
+  const getDetailsList = () => {
+    agentIncomeDetail({
+      cycle: cycle.value.value,
+    }).then((res) => {
+      totalInfo.value = res.data.value || {};
+    });
+  };
+
+  const checkDetails = (income) => {
+    detailsInfo.value = income;
+  };
+
+  const onConfirm = ({ selectedOptions }) => {
+    showPicker.value = false;
+    cycle.value = selectedOptions[0];
+    getDetailsList();
+  };
+</script>
 
 <style scoped lang="scss">
   .agent-income-details-page {

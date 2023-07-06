@@ -3,7 +3,7 @@
     <div class="item" v-for="item in productList" :key="item">
       <span class="tag">已开通</span>
       <div class="top">
-        <span class="tips">查看示例<van-icon name="arrow" color="rgba(166, 166, 166, 1)" /></span>
+        <span class="tips" @click="handleCheckExample">查看示例<van-icon name="arrow" color="rgba(166, 166, 166, 1)" /></span>
       </div>
       <div class="info">
         <div class="left">
@@ -41,9 +41,8 @@
   import { showToast } from 'vant';
   import QRCode from 'qrcode';
   import { agentProductList, agentUpdateProduct, agentPromoLink } from '/@/api';
-  import { getUrlParams2 } from '/@/utils';
 
-  const { agentNo = '' } = getUrlParams2(window.location.href);
+  const agentNo = sessionStorage.getItem('agentNo');
 
   let show = ref(false);
   let showQrcode = ref(false);
@@ -124,11 +123,16 @@
       document.body.removeChild(input);
     });
   };
+
+  const handleCheckExample = () => {
+      window.open('http://rpt.quchaq.com/profile/qucha/open/demo.pdf');
+  };
 </script>
 
 <style scoped lang="scss">
   .agent-product {
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
     padding: 60px 43px;
     background-color: rgba(245, 245, 245, 1);

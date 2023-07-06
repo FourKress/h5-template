@@ -4,7 +4,7 @@
     <van-dialog title="客服二维码" teleport="body" v-model:show="showQrcode" @confirm="handleCloseQrCode">
       <div class="qrcode-container">
         <img class="img" :src="qrcodeInfo.qrcode" />
-        <p class="mobile">{{ qrcodeInfo.mobile }}</p>
+        <p class="mobile">电话: {{ qrcodeInfo.mobile }}</p>
       </div>
     </van-dialog>
   </div>

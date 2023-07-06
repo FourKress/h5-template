@@ -4,4 +4,8 @@
 
 .van-nav-bar {
   background-color: rgba(2, 121, 254, 1) !important;
+
+  &:after {
+    border-color: rgba(2, 121, 254, 1) !important;
+  }
 }

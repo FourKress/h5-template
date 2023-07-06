@@ -126,7 +126,6 @@
 <style scoped lang="scss">
   .order {
     width: 100%;
-    height: 100%;
     box-sizing: border-box;
     padding: 60px 43px;
     background-color: rgba(245, 245, 245, 1);
@@ -160,7 +159,7 @@
       }
 
       .info {
-        padding-top: 20px;
+        padding-top: 40px;
 
         .row {
           font-size: 28px;
