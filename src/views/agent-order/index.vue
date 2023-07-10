@@ -2,36 +2,25 @@
   <div class="order">
     <div class="item" v-for="item in orderList" :key="item">
       <div class="top">
-        <span class="label">{{ item.productName }}</span>
+        <span class="label">{{ item.createTime }}</span>
         <span class="status">{{ applyStatusMap[item.applyStatus] }}</span>
+      </div>
+      <div class="tips">
+        <span class="label">{{ item.productName }}</span>
+        <span class="amount">实付 ¥{{ item.payAmt }}</span>
       </div>
       <div class="info">
         <div class="row">
-          <span class="label">姓名:</span>
+          <span class="label">订单号: {{item.paySerialNo}}</span>
+          <span class="text">{{ item.orderNo }}</span>
+        </div>
+        <div class="row">
+          <span class="label">客户:</span>
           <span class="text">{{ item.custName }}</span>
         </div>
-        <div class="row">
-          <span class="label">身份证号:</span>
-          <span class="text">{{ item.idNo }}</span>
-        </div>
-        <div class="row">
-          <span class="label">手机号:</span>
-          <span class="text">{{ item.mobile }}</span>
-        </div>
       </div>
-      <div class="tips">
-        <span class="label">实付</span>
-        <span class="amount">¥{{ item.payAmt }}</span>
-      </div>
-      <div class="footer">
-        <div class="btn" v-if="item.applyStatus === 'SUCCESS' && item.share === 'Y'" @click="handleSendAgent(item)">发送代理商</div>
-        <div class="btn" v-if="item.applyStatus === 'SUCCESS'" @click="handleDownload(item)">下载</div>
-
-        <div class="btn" v-if="item.applyStatus === 'FAILURE'"> <CustomerService>联系客服</CustomerService></div>
-        <div class="btn" v-if="item.applyStatus === 'FAILURE'" @click="handleRetry(item)">重试</div>
-
-        <div class="btn" v-if="item.applyStatus === 'REFUND'" @click="handleSearch">去查询</div>
-        <div class="btn" v-if="item.applyStatus === 'APPLY'" @click="handleCheckExample">查看示例</div>
+      <div class="footer" v-if="item.applyStatus === 'SUCCESS'">
+        <div class="btn" @click="handleReport(item)">可阅报告</div>
       </div>
     </div>
   </div>
@@ -39,22 +28,18 @@
 
 <script lang="ts" setup name="OrderPage">
   import { ref, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { showConfirmDialog, showLoadingToast, showToast } from 'vant';
-  import CustomerService from '/@/components/CustomerService.vue';
-  import { custApplyList, custReportDownload, custReportRetry, custReportShare } from '/@/api';
+  import { agentOrderList } from '/@/api';
 
-  const router = useRouter();
   const applyStatusMap = {
     APPLY: '生成中',
-    SUCCESS: '',
+    SUCCESS: '已完成',
     FAILURE: '生成失败',
     REFUND: '已退款',
   };
   let orderList = ref([]);
 
   const getList = () => {
-    custApplyList().then((res) => {
+    agentOrderList().then((res) => {
       console.log(res.data.value);
       orderList.value = res.data.value;
     });
@@ -64,62 +49,8 @@
     getList();
   });
 
-  const handleSendAgent = (order) => {
-    showConfirmDialog({
-      title: '确认发送',
-      message: '确认发送该报告给代理商？代理商仅能在24小时内查看。',
-    })
-      .then(() => {
-        const { paySerialNo } = order;
-        custReportShare({
-          paySerialNo,
-        }).then(() => {
-          showToast('已发送');
-        });
-      })
-      .catch(() => {});
-  };
-
-  const handleDownload = (order) => {
-    const loading = showLoadingToast({
-      message: '开始下载...',
-      forbidClick: true,
-      duration: 0,
-    });
-    const { paySerialNo } = order;
-    custReportDownload({
-      paySerialNo,
-    })
-      .then((res) => {
-        const blob = res.response.value;
-        const objectUrl = URL.createObjectURL(blob); // 创建URL
-        const link = document.createElement('a');
-        link.download = 'download';
-        link.href = objectUrl;
-        link.click(); // 下载文件
-        URL.revokeObjectURL(objectUrl); // 释放内存
-      })
-      .finally(() => {
-        loading.close();
-      });
-  };
-
-  const handleRetry = (order) => {
-    const { paySerialNo } = order;
-    custReportRetry({
-      paySerialNo,
-    }).then(() => {
-      showToast('重试成功');
-      getList();
-    });
-  };
-
-  const handleCheckExample = () => {
-    window.open('http://rpt.quchaq.com/profile/qucha/open/demo.pdf');
-  };
-
-  const handleSearch = () => {
-    router.push(`/register?agentNo=${sessionStorage.getItem('agentNo')}&productCode=${sessionStorage.getItem('productCode')}`);
+  const handleReport = (item) => {
+    console.log(item);
   };
 </script>
 
@@ -131,11 +62,11 @@
     background-color: rgba(245, 245, 245, 1);
 
     .item {
-      height: 458px;
+      height: 344px;
       border-radius: 20px;
       background: rgba(255, 255, 255, 1);
       box-sizing: border-box;
-      padding: 20px 34px 0;
+      padding: 28px 36px 0;
       margin-bottom: 60px;
 
       &:last-child {
@@ -148,8 +79,8 @@
         justify-content: space-between;
 
         .label {
-          font-size: 32px;
-          color: rgba(0, 0, 0, 1);
+          font-size: 28px;
+          color: rgba(166, 166, 166, 1);
         }
 
         .status {
@@ -159,31 +90,31 @@
       }
 
       .info {
-        padding-top: 40px;
-
         .row {
+          display: flex;
+          align-items: center;
           font-size: 28px;
-          color: rgba(128, 128, 128, 1);
-          margin-bottom: 24px;
+          color: rgba(0, 0, 0, 1);
+          margin-bottom: 12px;
 
-          .text {
-            padding-left: 10px;
+          .label {
+            min-width: 90px;
+            text-align: right;
+            padding-right: 12px;
           }
         }
       }
 
       .tips {
-        text-align: right;
-        font-size: 26px;
-        color: rgba(166, 166, 166, 1);
-        margin-bottom: 22px;
-        border-bottom: 2px solid rgba(229, 229, 229, 1);
-        padding-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 28px;
+        color: rgba(2, 121, 254, 1);
+        margin: 13px 0 15px 0;
 
         .amount {
-          font-size: 26px;
           color: rgba(0, 0, 0, 1);
-          padding-left: 29px;
         }
       }
 
@@ -214,12 +145,5 @@
         }
       }
     }
-  }
-
-  .img {
-    display: flex;
-    width: 300px;
-    height: 300px;
-    margin: 50px auto 0;
   }
 </style>

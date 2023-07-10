@@ -183,7 +183,7 @@
         smsKey: smsKey.value,
         smsCode,
         payChannel: 'WECHAT_PAY',
-        // orderAmt: '',
+        orderAmt: amt.value,
         terminal: judgeClient(),
       }).then((res) => {
         handleLogin(res);
@@ -197,7 +197,7 @@
         userName,
       }).then((res) => {
         handleLogin(res);
-        router.push(`/order?agentNo=${agentNo}`);
+        router.push(`/order`);
       });
     }
   };
@@ -251,7 +251,7 @@
   };
 
   const handlePay = () => {
-    router.push(`/order?agentNo=${agentNo}`);
+    router.push(`/order`);
   };
 </script>
 

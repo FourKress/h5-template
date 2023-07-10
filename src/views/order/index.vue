@@ -119,7 +119,7 @@
   };
 
   const handleSearch = () => {
-    router.push(`/register?agentNo=${sessionStorage.getItem('agentNo')}&productCode=${sessionStorage.getItem('productCode')}`);
+    router.push(`/register?productCode=${sessionStorage.getItem('productCode')}`);
   };
 </script>
 

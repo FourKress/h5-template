@@ -239,3 +239,12 @@ export function agentStatus() {
   });
 }
 
+/**
+ * 代理状态
+ * @returns UseAxiosReturn
+ */
+export function agentOrderList() {
+  return useAxiosApi(`/rpt/agent/api/v1/orderList`, {
+    method: 'POST',
+  });
+}

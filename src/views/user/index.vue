@@ -33,7 +33,7 @@
         <span class="label">收益</span>
       </div>
     </div>
-    <div class="card">
+    <div class="card" v-if="!status">
       <div class="row" @click="handleJump('/agentRegister')">
         <van-icon name="shield-o" size="20" color="rgba(2, 121, 254, 1)" />
         <span class="label">认证</span>

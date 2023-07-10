@@ -3,10 +3,10 @@
     <div class="top-tips">请勿随意传播 避免客户信息泄露</div>
     <div class="item" v-for="item in reportList" :key="item">
       <div class="top">
-        <span class="label">专业版</span>
+        <span class="label">{{ item.productName }}</span>
         <span class="status">到期时间</span>
       </div>
-      <div class="timer"> 2023-03-11 20:23:32 </div>
+      <div class="timer"> {{ item.expireDate }} </div>
       <div class="info">
         <div class="row">
           <span class="label">姓名:</span>
